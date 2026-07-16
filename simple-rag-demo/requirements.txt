@@ -1,0 +1,8 @@
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-huggingface==0.1.2
+faiss-cpu==1.9.0.post1
+sentence-transformers==3.3.1
+pypdf==5.1.0
+ollama==0.4.7
+streamlit==1.41.1
