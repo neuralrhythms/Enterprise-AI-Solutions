@@ -29,3 +29,21 @@ simple-rag-demo/design-principles.md
 *.tfstate.backup
 .terraform/
 terraform.tfvars.local
+
+# ─── simple-rag-demo-v2 ──────────────────────────────────────────────────────
+# Proprietary source documents — never commit
+simple-rag-demo-v2/documents/*
+!simple-rag-demo-v2/documents/.gitkeep
+
+# Local PDF staging directory — proprietary, never commit
+simple-rag-demo-v2/pdf/
+
+# Vectorstore — generated artefacts from local runs, never commit
+simple-rag-demo-v2/vectorstore/*
+!simple-rag-demo-v2/vectorstore/.gitkeep
+
+# Runtime query logs — contain actual user queries, never commit
+simple-rag-demo-v2/logs/
+
+# Backup folder — local only, never commit
+simple-rag-demo-v2-backup-baseline/
