@@ -11,7 +11,7 @@
   <img alt="AWS" src="https://img.shields.io/badge/AWS-Cloud%20Native-FF9900?style=flat-square&logo=amazonaws&logoColor=white"/>
   <img alt="Terraform" src="https://img.shields.io/badge/Terraform-%3E%3D1.5-7B42BC?style=flat-square&logo=terraform&logoColor=white"/>
   <img alt="Well-Architected" src="https://img.shields.io/badge/AWS-Well--Architected-232F3E?style=flat-square&logo=amazonaws&logoColor=white"/>
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/></a>
   <img alt="Status" src="https://img.shields.io/badge/Status-Reference%20Architecture-blue?style=flat-square"/>
 </p>
 
