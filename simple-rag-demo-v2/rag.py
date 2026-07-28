@@ -34,6 +34,7 @@ from config import (
     BGE_QUERY_PREFIX,
     CANDIDATE_K,
     EMBEDDING_MODEL,
+    GROQ_API_KEY,
     MIN_SCORE,
     OLLAMA_MODEL,
     TIMINGS_LOG_PATH,
@@ -516,9 +517,11 @@ def generate_answer(context: str, question: str) -> str:
     """
     Generate an answer from the LLM using the structured RAG prompt.
 
-    Builds the prompt from RAG_PROMPT_TEMPLATE, invokes the locally running
-    Ollama model, and returns the answer string. If Ollama is unreachable or
-    times out, a ConnectionError is raised with an actionable message.
+    Uses Groq (cloud, free tier) when GROQ_API_KEY is set in the environment,
+    otherwise falls back to the locally running Ollama model.
+
+    Groq model: llama-3.2-3b-preview (same Llama 3.2 family as local Ollama,
+    comparable answer quality, ~500 tokens/s vs ~2 tokens/s locally).
 
     Args:
         context:  The concatenated parent chunk text to use as context.
@@ -528,25 +531,40 @@ def generate_answer(context: str, question: str) -> str:
         The answer string produced by the LLM.
 
     Raises:
-        ConnectionError: If Ollama cannot be reached or does not respond in time.
+        ConnectionError: If the selected LLM cannot be reached or times out.
     """
     prompt = RAG_PROMPT_TEMPLATE.format(context=context, question=question)
 
     try:
-        llm = Ollama(model=OLLAMA_MODEL, timeout=60)
-        answer = llm.invoke(prompt)
+        if GROQ_API_KEY:
+            # Groq hosted inference — no local Ollama required.
+            # OLLAMA_MODEL is reused as the model name; set it to a Groq-compatible
+            # model ID e.g. "llama-3.2-3b-preview" or "llama-3.1-8b-instant".
+            from langchain_groq import ChatGroq
+            llm = ChatGroq(model=OLLAMA_MODEL, api_key=GROQ_API_KEY)
+            answer = llm.invoke(prompt).content
+        else:
+            # Local Ollama fallback — default behaviour unchanged from v2.
+            llm = Ollama(model=OLLAMA_MODEL, timeout=60)
+            answer = llm.invoke(prompt)
     except ConnectionError:
         raise ConnectionError(
-            "Ollama is unavailable. Ensure it is running at localhost:11434."
+            "LLM is unavailable. "
+            "If using Groq, check your GROQ_API_KEY. "
+            "If using Ollama, ensure it is running at localhost:11434."
         )
     except TimeoutError:
         raise ConnectionError(
-            "Ollama is unavailable. Ensure it is running at localhost:11434."
+            "LLM is unavailable. "
+            "If using Groq, check your GROQ_API_KEY. "
+            "If using Ollama, ensure it is running at localhost:11434."
         )
     except Exception as exc:
-        if "connection" in str(exc).lower():
+        error_str = str(exc).lower()
+        if "connection" in error_str or "api" in error_str or "authenticate" in error_str:
             raise ConnectionError(
-                "Ollama is unavailable. Ensure it is running at localhost:11434."
+                f"LLM error: {exc}. "
+                "If using Groq, verify your GROQ_API_KEY is valid."
             )
         raise
 

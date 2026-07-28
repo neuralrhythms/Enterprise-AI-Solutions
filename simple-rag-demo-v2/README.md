@@ -1,6 +1,6 @@
 # 🔍 Intelligent Document Search v2
 
-> An enhanced local RAG pipeline with hierarchical chunking, BGE embeddings, hybrid BM25+FAISS retrieval, and cross-encoder re-ranking — all running on CPU.
+> An enhanced local RAG pipeline with hierarchical chunking, BGE embeddings, hybrid BM25+FAISS retrieval, and cross-encoder re-ranking. Runs fully locally with Ollama, or with Groq cloud inference for fast generation without a GPU.
 
 A local RAG pipeline built entirely with open-source tools — no cloud, no GPU required. Built as a learning resource, it prioritises transparency at every level: the code exposes every pipeline stage explicitly, and the built-in observability layer records what each stage costs at runtime.
 
@@ -9,7 +9,8 @@ A local RAG pipeline built entirely with open-source tools — no cloud, no GPU 
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=flat&logo=streamlit&logoColor=white)
 ![BGE](https://img.shields.io/badge/BGE-bge--base--en--v1.5-0057FF?style=flat)
 ![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-black?style=flat)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+![Groq](https://img.shields.io/badge/Groq-cloud%20LLM-F55036?style=flat)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
 ---
 
@@ -31,7 +32,7 @@ Every call to `answer_question()` times each of the following stages independent
 | `rrf_mmr_s` | RRF fusion, MIN_SCORE filter, and MMR diversity selection |
 | `cross_encoder_load_s` | Cross-encoder re-ranker model initialised |
 | `cross_encoder_rank_s` | All candidates scored jointly against the query |
-| `llm_generate_s` | Ollama LLM generates the final answer |
+| `llm_generate_s` | LLM generates the final answer (Ollama local or Groq cloud) |
 | `total_s` | Full end-to-end wall-clock time |
 
 ### Where results appear
@@ -47,8 +48,12 @@ Timing breakdown:
   rrf_mmr_s                 :  0.0198 s
   cross_encoder_load_s      :  2.1731 s
   cross_encoder_rank_s      :  0.8713 s
-  llm_generate_s            : 45.1621 s
+  llm_generate_s            : 45.1621 s   ← Ollama local (CPU)
   total_s                   : 54.7504 s
+
+# With Groq:
+  llm_generate_s            :  1.7360 s   ← Groq cloud (26× faster)
+  total_s                   : 10.8220 s
 ```
 
 **UI** — two metric cards show the two slowest stages automatically, and a collapsible "⏱ Timing Breakdown" expander below the answer shows all 10 stages.
@@ -80,7 +85,7 @@ The log file is append-only across sessions, so timing data accumulates as you t
 
 The timing data from a real run on an i5-6600 / 16 GB RAM / no GPU machine reveals a pattern that is common in local RAG deployments:
 
-- **LLM generation dominates** — 45s out of 55s total (82%) is pure CPU token generation. This is a hardware ceiling, not a pipeline design problem.
+- **LLM generation dominates on CPU** — 45s out of 55s total (82%) is pure CPU token generation with Ollama. Switching to Groq reduces `llm_generate_s` to ~1.7s (26× faster) — the same pipeline, different execution environment.
 - **Model re-initialisation is avoidable** — `index_load_s` + `bge_model_load_s` + `cross_encoder_load_s` add up to ~8.5s of overhead that repeats on every query. Caching these in `st.cache_resource` would eliminate this cost entirely.
 - **Retrieval itself is fast** — `faiss_search_s` + `bm25_score_s` + `rrf_mmr_s` together take under 0.15s. The hybrid retrieval pipeline adds negligible latency.
 
@@ -113,6 +118,7 @@ for line in Path('logs/rag_timings.jsonl').read_text(encoding='utf-8').strip().s
 | **Observability** | 10-span `time.monotonic()` timing, JSONL log, dynamic UI metric cards |
 | **UI** | Wide layout, dark theme, hero header, sidebar chunk cards with score indicators |
 | **Index** | Incremental update support — add documents without a full rebuild |
+| **LLM** | Optional Groq integration — set `GROQ_API_KEY` to use cloud inference instead of local Ollama |
 
 ---
 
@@ -162,7 +168,8 @@ Two workflows run independently:
 | Vector store | FAISS (`faiss-cpu`) | Fast dense similarity search over child chunks |
 | Keyword index | `rank-bm25` (BM25Okapi) | Keyword-based retrieval for exact term matching |
 | Re-ranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Joint query+passage scoring for final ranking |
-| LLM | Ollama (llama3.2) | Local answer generation, no internet required |
+| LLM (local) | Ollama (llama3.2) | Local answer generation, no internet required |
+| LLM (cloud) | Groq (`llama-3.1-8b-instant`) | Optional — set `GROQ_API_KEY` for 26× faster generation |
 
 ---
 
@@ -192,8 +199,8 @@ simple-rag-demo-v2/
 |---|---|---|
 | Python | 3.12+ | [python.org/downloads](https://www.python.org/downloads/) |
 | Git | any | [git-scm.com](https://git-scm.com/) |
-| Ollama | latest | [ollama.com/download](https://ollama.com/download) |
-| Disk space | ~6 GB | Embedding model (~420 MB), cross-encoder (~90 MB), LLM (~2 GB) |
+| Ollama | latest | [ollama.com/download](https://ollama.com/download) — optional if using Groq |
+| Disk space | ~4 GB | Embedding model (~420 MB), cross-encoder (~90 MB), LLM (~2 GB if using Ollama) |
 
 **Supported platforms:** macOS 12+, Ubuntu 20.04+, Windows 10/11
 
@@ -254,6 +261,38 @@ ollama pull llama3.2
 ```
 
 Downloads the model weights (~2 GB). Runs once; cached locally after that. To use a different model, see [Tuning for Better Responses](#tuning-for-better-responses).
+
+---
+
+### Step 2b — Groq (optional — skip if using Ollama)
+
+Groq provides free cloud inference with no GPU required. Generation is ~26× faster than local Ollama on CPU hardware.
+
+1. Get a free API key at [console.groq.com](https://console.groq.com) — no credit card required.
+2. Set the environment variable before launching the app:
+
+**Windows PowerShell:**
+```powershell
+$env:GROQ_API_KEY="your-key-here"
+$env:OLLAMA_MODEL="llama-3.1-8b-instant"
+```
+
+**macOS / Linux:**
+```bash
+export GROQ_API_KEY="your-key-here"
+export OLLAMA_MODEL="llama-3.1-8b-instant"
+```
+
+Available Groq models (set via `OLLAMA_MODEL` environment variable):
+
+| Model | Groq ID | Notes |
+|---|---|---|
+| Llama 3.1 8B | `llama-3.1-8b-instant` | Fastest, recommended |
+| Llama 3.3 70B | `llama-3.3-70b-versatile` | Strongest quality |
+| Llama 3.2 3B | `llama-3.2-3b-preview` | Lightest |
+| Mixtral 8x7B | `mixtral-8x7b-32768` | Good for technical documents |
+
+> When `GROQ_API_KEY` is set, Ollama does not need to be running. The app detects the key automatically and routes generation to Groq.
 
 ---
 
@@ -353,6 +392,8 @@ python ingest.py --incremental
 
 ### Step 8 — Start Ollama
 
+> Skip this step if you set `GROQ_API_KEY` in Step 2b — Ollama is not required when using Groq.
+
 **macOS / Linux** — run in a separate terminal:
 ```bash
 ollama serve
@@ -432,8 +473,13 @@ To rebuild the index from scratch (e.g., after removing or replacing documents):
 All parameters live in `config.py`. No other file needs editing for basic configuration.
 
 ```python
-# Embedding and generation models
+# Embedding model
 EMBEDDING_MODEL = "BAAI/bge-base-en-v1.5"
+
+# LLM model name — used by both Ollama and Groq.
+# For Ollama: "llama3.2", "mistral", "llama3.1:8b"
+# For Groq:   "llama-3.1-8b-instant", "llama-3.3-70b-versatile"
+# Override at runtime: set OLLAMA_MODEL environment variable
 OLLAMA_MODEL    = "llama3.2"
 
 # Directories
@@ -535,11 +581,11 @@ How many candidates are pulled from FAISS and BM25 before re-ranking. A larger p
 
 ---
 
-### 6. OLLAMA_MODEL — the language model
+### 6. LLM — the language model
 
-**File:** `config.py` &nbsp;|&nbsp; **Re-ingestion required:** No
+**File:** `config.py` / environment variable `OLLAMA_MODEL` &nbsp;|&nbsp; **Re-ingestion required:** No
 
-`llama3.2` is a 3B parameter model optimised for speed on CPU. Larger models produce noticeably better answers on complex or ambiguous documents.
+**Ollama (local)** — runs on CPU, no internet required:
 
 | Model | Download size | Notes |
 |---|---|---|
@@ -550,12 +596,21 @@ How many candidates are pulled from FAISS and BM25 before re-ranking. A larger p
 ```bash
 ollama pull mistral
 ```
-```python
-# config.py
-OLLAMA_MODEL = "mistral"
+
+**Groq (cloud, free tier)** — set `GROQ_API_KEY` to activate; ~26× faster than local CPU:
+
+| Model | Groq ID | Speed |
+|---|---|---|
+| Llama 3.1 8B | `llama-3.1-8b-instant` | Fastest |
+| Llama 3.3 70B | `llama-3.3-70b-versatile` | Best quality |
+| Mixtral 8x7B | `mixtral-8x7b-32768` | Good for technical docs |
+
+```powershell
+$env:GROQ_API_KEY="your-key-here"
+$env:OLLAMA_MODEL="llama-3.1-8b-instant"
 ```
 
-> `mistral` and `llama3.1:8b` require more available RAM and will increase generation time on i5-class hardware with no GPU.
+> The pipeline automatically uses Groq when `GROQ_API_KEY` is set and falls back to Ollama when it is not.
 
 ---
 
@@ -632,6 +687,18 @@ The PATH update from the installer only takes effect in new terminal sessions. C
 <summary><b>No relevant chunks found above the minimum similarity threshold.</b></summary>
 
 The query did not match any chunks with a similarity score at or above `MIN_SCORE`. Lower `MIN_SCORE` in `config.py` (try `0.20`) and re-run the query. If the issue persists, ensure the relevant PDFs are in `documents/` and that ingestion has been re-run after adding them.
+</details>
+
+<details>
+<summary><b>Error: model 'llama3.2' does not exist on Groq</b></summary>
+
+Groq uses different model IDs from Ollama. Set `OLLAMA_MODEL` to a valid Groq model ID, e.g. `llama-3.1-8b-instant`. See the model table in [Step 2b](#step-2b--groq-optional--skip-if-using-ollama).
+</details>
+
+<details>
+<summary><b>Groq API key is set but the app still tries to use Ollama</b></summary>
+
+The environment variable must be set in the same terminal session before launching the app. Close the terminal, open a new one, set `$env:GROQ_API_KEY`, then run `streamlit run app.py`.
 </details>
 
 <details>

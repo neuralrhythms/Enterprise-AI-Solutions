@@ -132,15 +132,19 @@ def _check_ollama_or_stop() -> None:
     """
     Verify that the Ollama service is reachable at localhost:11434.
 
-    Makes a lightweight HTTP request with a 2-second timeout. On any
-    exception (connection refused, timeout, etc.) displays a st.error
-    and calls st.stop().
+    Skipped automatically when GROQ_API_KEY is set — Ollama is not needed
+    when using Groq for generation.
     """
+    from config import GROQ_API_KEY
+    if GROQ_API_KEY:
+        # Groq is active — Ollama is not required.
+        return
     try:
         urllib.request.urlopen("http://localhost:11434", timeout=2)
     except Exception:
         st.error(
-            "Ollama is unavailable. Ensure it is running at localhost:11434."
+            "Ollama is unavailable. Ensure it is running at localhost:11434. "
+            "Alternatively set the GROQ_API_KEY environment variable to use Groq instead."
         )
         st.stop()
 
@@ -369,10 +373,11 @@ def render_main_panel() -> None:
     st.markdown("---")
 
     question = st.text_input(
-        "",
+        "Your question",
         placeholder="Ask a question about your documents…",
         max_chars=200,
         key="question",
+        label_visibility="collapsed",
     )
 
     # Live character counter (Req 8.4)
@@ -423,21 +428,16 @@ def render_main_panel() -> None:
                     )
                 except RuntimeError as exc:
                     error_message = str(exc)
-                except ConnectionError:
-                    error_message = (
-                        "Ollama is unavailable. "
-                        "Ensure it is running at localhost:11434."
-                    )
+                except ConnectionError as exc:
+                    error_message = str(exc)
                 except ValueError:
                     # Empty/whitespace question — already guarded above, but
                     # handle defensively in case answer_question raises it.
                     error_message = (
                         "Please enter a question before submitting."
                     )
-                except Exception:
-                    error_message = (
-                        "An unexpected error occurred. Please try again."
-                    )
+                except Exception as exc:
+                    error_message = f"Error: {type(exc).__name__}: {exc}"
 
             if error_message is not None:
                 st.error(error_message)

@@ -6,9 +6,16 @@ modules. No logic, no I/O beyond validate_config(). Import this module
 to access shared configuration values.
 """
 
+import os
+
+# Groq API key — optional. When set, Groq is used for LLM generation instead
+# of Ollama. Get a free key at https://console.groq.com — no credit card required.
+# Leave unset (or empty) to keep using Ollama locally.
+GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY", "")
+
 # Embedding and LLM models
 EMBEDDING_MODEL: str = "BAAI/bge-base-en-v1.5"
-OLLAMA_MODEL: str = "llama3.2"
+OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
 # BGE asymmetric prefixes
 # BGE models are trained with separate instruction prefixes for queries vs passages.
