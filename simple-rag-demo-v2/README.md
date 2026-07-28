@@ -4,13 +4,7 @@
 
 A local RAG pipeline built entirely with open-source tools — no cloud, no GPU required. Built as a learning resource, it prioritises transparency at every level: the code exposes every pipeline stage explicitly, and the built-in observability layer records what each stage costs at runtime.
 
-![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?style=flat&logo=chainlink&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=flat&logo=streamlit&logoColor=white)
-![BGE](https://img.shields.io/badge/BGE-bge--base--en--v1.5-0057FF?style=flat)
-![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-black?style=flat)
-![Groq](https://img.shields.io/badge/Groq-cloud%20LLM-F55036?style=flat)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/) [![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?style=flat&logo=chainlink&logoColor=white)](https://python.langchain.com/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/) [![BGE](https://img.shields.io/badge/BGE-bge--base--en--v1.5-0057FF?style=flat)](https://huggingface.co/BAAI/bge-base-en-v1.5) [![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-black?style=flat)](https://ollama.com/) [![Groq](https://img.shields.io/badge/Groq-cloud%20LLM-F55036?style=flat)](https://console.groq.com/) [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
 ---
 

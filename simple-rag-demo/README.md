@@ -4,11 +4,7 @@
 
 An end-to-end RAG pipeline built with open-source tools — LangChain, FAISS, HuggingFace sentence-transformers, Ollama, and Streamlit. Designed for developers who want to understand every step of the RAG workflow, from PDF ingestion to answer generation, in clean and readable Python.
 
-![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)
-![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?style=flat&logo=chainlink&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.41-FF4B4B?style=flat&logo=streamlit&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-black?style=flat)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/) [![LangChain](https://img.shields.io/badge/LangChain-0.3-1C3C3C?style=flat&logo=chainlink&logoColor=white)](https://python.langchain.com/) [![Streamlit](https://img.shields.io/badge/Streamlit-1.41-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://streamlit.io/) [![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-black?style=flat)](https://ollama.com/) [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
 ---
 

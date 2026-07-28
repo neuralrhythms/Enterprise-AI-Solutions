@@ -8,7 +8,7 @@
   <img alt="AWS" src="https://img.shields.io/badge/AWS-Cloud%20Native-FF9900?style=flat-square&logo=amazonaws&logoColor=white"/>
   <img alt="Azure" src="https://img.shields.io/badge/Azure-Cloud%20Native-0078D4?style=flat-square&logo=microsoftazure&logoColor=white"/>
   <img alt="Terraform" src="https://img.shields.io/badge/IaC-Terraform-7B42BC?style=flat-square&logo=terraform&logoColor=white"/>
-  <img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/></a>
 </p>
 
 ---
