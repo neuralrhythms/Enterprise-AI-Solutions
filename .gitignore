@@ -47,3 +47,15 @@ simple-rag-demo-v2/logs/
 
 # Backup folder — local only, never commit
 simple-rag-demo-v2-backup-baseline/
+
+# ─── simple-rag-demo-v3 ──────────────────────────────────────────────────────
+simple-rag-demo-v3/documents/*
+!simple-rag-demo-v3/documents/.gitkeep
+simple-rag-demo-v3/pdf/
+simple-rag-demo-v3/vectorstore/*
+!simple-rag-demo-v3/vectorstore/.gitkeep
+simple-rag-demo-v3/logs/
+simple-rag-demo-v3-backup-baseline/
+simple-rag-demo-v3-backup-manual/
+simple-rag-demo-v3-backup-working/
+
