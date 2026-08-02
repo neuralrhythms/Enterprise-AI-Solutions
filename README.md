@@ -27,6 +27,7 @@ The goal is to build solid conceptual foundations at every step. Rather than jum
 |---|---|---|---|
 | [Simple RAG Demo](simple-rag-demo/) | Generative AI · RAG · Local LLM | ![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=flat-square) | Local |
 | [Simple RAG Demo v2](simple-rag-demo-v2/) | Generative AI · RAG · Hybrid Retrieval · Observability | ![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=flat-square) | Local |
+| [Simple RAG Demo v3](simple-rag-demo-v3/) | Generative AI · RAG · Groq LLM · Langfuse Observability | ![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=flat-square) | Local + Cloud LLM |
 | [AI Platform Operations](ai-platform-operations/) | DevOps · Platform Engineering · Security · Governance | ![Status](https://img.shields.io/badge/Status-Complete-brightgreen?style=flat-square) | AWS |
 
 ---
@@ -37,6 +38,7 @@ The goal is to build solid conceptual foundations at every step. Rather than jum
 Enterprise-AI-Solutions/
 ├── simple-rag-demo/            # Local RAG pipeline — LangChain, FAISS, Ollama, Streamlit
 ├── simple-rag-demo-v2/         # Enhanced RAG — BGE embeddings, hybrid retrieval, observability layer
+├── simple-rag-demo-v3/         # Groq LLM + Langfuse observability — traces, spans, generation metrics
 └── ai-platform-operations/     # AWS operational framework — Terraform, Bedrock, SageMaker
 ```
 
